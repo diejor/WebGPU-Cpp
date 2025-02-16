@@ -101,8 +101,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() { nextInChain = nullptr; } \
 	Type(const W &other) : W(other) { nextInChain = nullptr; } \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 	friend auto operator<<(std::ostream &stream, const S&) -> std::ostream & { \
 		return stream << "<wgpu::" << #Type << ">"; \
 	} \
@@ -115,8 +115,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() {} \
 	Type(const W &other) : W(other) {} \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 public:
 
 #define STRUCT(Type) \
@@ -143,10 +143,10 @@ public: \
 
 {{begin-inject}}
 HANDLE(Instance)
-	Adapter requestAdapter(const RequestAdapterOptions& options);
+	Adapter request_adapter(const RequestAdapterOptions& options);
 END
 HANDLE(Adapter)
-	Device requestDevice(const DeviceDescriptor& descriptor);
+	Device request_device(const DeviceDescriptor& descriptor);
 END
 STRUCT(Color)
 	Color(double r, double g, double b, double a) : WGPUColor{ r, g, b, a } {}
@@ -194,16 +194,16 @@ wgpuDeviceGetLostFuture
 // Non-member procedures
 {{procedures}}
 
-Instance createInstance();
-Instance createInstance(const InstanceDescriptor& descriptor);
+Instance create_instance();
+Instance create_instance(const InstanceDescriptor& descriptor);
 
 #ifdef WEBGPU_CPP_IMPLEMENTATION
 
-Instance createInstance() {
+Instance create_instance() {
 	return wgpuCreateInstance(nullptr);
 }
 
-Instance createInstance(const InstanceDescriptor& descriptor) {
+Instance create_instance(const InstanceDescriptor& descriptor) {
 	return wgpuCreateInstance(&descriptor);
 }
 
@@ -211,7 +211,7 @@ Instance createInstance(const InstanceDescriptor& descriptor) {
 {{handles_impl}}
 
 // Extra implementations
-Adapter Instance::requestAdapter(const RequestAdapterOptions& options) {
+Adapter Instance::request_adapter(const RequestAdapterOptions& options) {
 	struct Context {
 		Adapter adapter = nullptr;
 		bool requestEnded = false;
@@ -238,7 +238,7 @@ Adapter Instance::requestAdapter(const RequestAdapterOptions& options) {
 		context.requestEnded = true;
 	};
 	callbackInfo.mode = CallbackMode::AllowSpontaneous;
-	requestAdapter{{ext_suffix}}(options, callbackInfo);
+	request_adapter{{ext_suffix}}(options, callbackInfo);
 
 #if __EMSCRIPTEN__
 	while (!context.requestEnded) {
@@ -250,7 +250,7 @@ Adapter Instance::requestAdapter(const RequestAdapterOptions& options) {
 	return context.adapter;
 }
 
-Device Adapter::requestDevice(const DeviceDescriptor& descriptor) {
+Device Adapter::request_device(const DeviceDescriptor& descriptor) {
 	struct Context {
 		Device device = nullptr;
 		bool requestEnded = false;
@@ -277,7 +277,7 @@ Device Adapter::requestDevice(const DeviceDescriptor& descriptor) {
 		context.requestEnded = true;
 	};
 	callbackInfo.mode = CallbackMode::AllowSpontaneous;
-	requestDevice{{ext_suffix}}(descriptor, callbackInfo);
+	request_device{{ext_suffix}}(descriptor, callbackInfo);
 
 #if __EMSCRIPTEN__
 	while (!context.requestEnded) {

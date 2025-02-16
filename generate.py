@@ -37,6 +37,12 @@ import logging
 
 DEFAULT_HEADER_URL = "https://raw.githubusercontent.com/webgpu-native/webgpu-headers/main/webgpu.h"
 
+def to_snake_case(name: str) -> str:
+    s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
+    s2 = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1)
+    return s2.lower()
+
+
 def makeArgParser():
     import argparse
 
@@ -541,7 +547,7 @@ def produceBinding(args, api, meta):
 
         # Auto-generate setDefault
         if entry_type == 'CLASS':
-            decls.append(f"\t{maybe_inline}void setDefault();\n")
+            decls.append(f"\t{maybe_inline}void {to_snake_case('setDefault')}();\n")
 
             cls_api = handle_or_class
             prop_names = [f"{p.name}" for p in cls_api.properties]
@@ -576,7 +582,7 @@ def produceBinding(args, api, meta):
                 else:
                     logging.warning(f"Type {entry_name} starts with a 'chain' field but has no apparent associated SType.")
             implems.append(
-                f"{maybe_inline}void {entry_name}::setDefault() " + "{\n"
+                f"{maybe_inline}void {entry_name}::{to_snake_case('setDefault')}() " + "{\n"
                 + "".join(prop_defaults)
                 + "}\n"
             )
@@ -587,7 +593,8 @@ def produceBinding(args, api, meta):
             if "wgpu" + entry_name + proc.name + "\n" in meta["blacklist"]:
                 logging.debug(f"Skipping wgpu{entry_name}{proc.name} (blacklisted)...")
                 continue
-            method_name = proc.name[0].lower() + proc.name[1:]
+            # method_name = proc.name[0].lower() + proc.name[1:]
+            method_name = to_snake_case(proc.name)
 
             arguments, argument_names = [], []
             skip_next = False
@@ -733,7 +740,8 @@ def produceBinding(args, api, meta):
                 continue
             arg_sig = map(lambda a: f"{a.type} {a.name}", proc.arguments)
             arg_names = map(lambda a: a.name, proc.arguments)
-            proc_name = proc.name[0].lower() + proc.name[1:]
+            #proc_name = proc.name[0].lower() + proc.name[1:]
+            proc_name = to_snake_case(proc.name)
             binding["procedures"].append(
                 f"{proc.return_type} {proc_name}({', '.join(arg_sig)}) {{\n"
                 + f"\treturn wgpu{proc.name}({', '.join(arg_names)});\n"
