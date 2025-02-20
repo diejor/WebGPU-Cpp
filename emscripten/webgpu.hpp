@@ -101,8 +101,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() { nextInChain = nullptr; } \
 	Type(const W &other) : W(other) { nextInChain = nullptr; } \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 	friend auto operator<<(std::ostream &stream, const S&) -> std::ostream & { \
 		return stream << "<wgpu::" << #Type << ">"; \
 	} \
@@ -115,8 +115,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() {} \
 	Type(const W &other) : W(other) {} \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 public:
 
 #define STRUCT(Type) \
@@ -1046,7 +1046,7 @@ HANDLE(Adapter)
 	NO_DISCARD std::unique_ptr<RequestDeviceCallback> request_device(const DeviceDescriptor& descriptor, RequestDeviceCallback&& callback) const;
 	void reference() const;
 	void release() const;
-	Device requestDevice(const DeviceDescriptor& descriptor);
+	Device request_device(const DeviceDescriptor& descriptor);
 END
 
 HANDLE(BindGroup)
@@ -1164,7 +1164,7 @@ HANDLE(Instance)
 	NO_DISCARD std::unique_ptr<RequestAdapterCallback> request_adapter(const RequestAdapterOptions& options, RequestAdapterCallback&& callback) const;
 	void reference() const;
 	void release() const;
-	Adapter requestAdapter(const RequestAdapterOptions& options);
+	Adapter request_adapter(const RequestAdapterOptions& options);
 END
 
 HANDLE(PipelineLayout)
@@ -1317,16 +1317,16 @@ END
 // Non-member procedures
 
 
-Instance createInstance();
-Instance createInstance(const InstanceDescriptor& descriptor);
+Instance create_instance();
+Instance create_instance(const InstanceDescriptor& descriptor);
 
 #ifdef WEBGPU_CPP_IMPLEMENTATION
 
-Instance createInstance() {
+Instance create_instance() {
 	return wgpuCreateInstance(nullptr);
 }
 
-Instance createInstance(const InstanceDescriptor& descriptor) {
+Instance create_instance(const InstanceDescriptor& descriptor) {
 	return wgpuCreateInstance(&descriptor);
 }
 
@@ -1500,7 +1500,7 @@ void PipelineLayoutDescriptor::set_default() {
 // Methods of PrimitiveDepthClipControl
 void PrimitiveDepthClipControl::set_default() {
 	unclippedDepth = false;
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::PrimitiveDepthClipControl;
 	chain.next = nullptr;
 }
@@ -1558,7 +1558,7 @@ void RenderPassDepthStencilAttachment::set_default() {
 
 // Methods of RenderPassDescriptorMaxDrawCount
 void RenderPassDescriptorMaxDrawCount::set_default() {
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::RenderPassDescriptorMaxDrawCount;
 	chain.next = nullptr;
 }
@@ -1604,7 +1604,7 @@ void SamplerDescriptor::set_default() {
 
 // Methods of ShaderModuleSPIRVDescriptor
 void ShaderModuleSPIRVDescriptor::set_default() {
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::ShaderModuleSPIRVDescriptor;
 	chain.next = nullptr;
 }
@@ -1612,7 +1612,7 @@ void ShaderModuleSPIRVDescriptor::set_default() {
 
 // Methods of ShaderModuleWGSLDescriptor
 void ShaderModuleWGSLDescriptor::set_default() {
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::ShaderModuleWGSLDescriptor;
 	chain.next = nullptr;
 }
@@ -1661,7 +1661,7 @@ void SurfaceDescriptor::set_default() {
 
 // Methods of SurfaceDescriptorFromCanvasHTMLSelector
 void SurfaceDescriptorFromCanvasHTMLSelector::set_default() {
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::SurfaceDescriptorFromCanvasHTMLSelector;
 	chain.next = nullptr;
 }
@@ -1689,7 +1689,7 @@ void TextureBindingLayout::set_default() {
 // Methods of TextureBindingViewDimensionDescriptor
 void TextureBindingViewDimensionDescriptor::set_default() {
 	textureBindingViewDimension = TextureViewDimension::Undefined;
-	((ChainedStruct*)&chain)->setDefault();
+	((ChainedStruct*)&chain)->set_default();
 	chain.sType = SType::TextureBindingViewDimensionDescriptor;
 	chain.next = nullptr;
 }
@@ -1723,10 +1723,10 @@ void BindGroupDescriptor::set_default() {
 
 // Methods of BindGroupLayoutEntry
 void BindGroupLayoutEntry::set_default() {
-	((BufferBindingLayout*)&buffer)->setDefault();
-	((SamplerBindingLayout*)&sampler)->setDefault();
-	((TextureBindingLayout*)&texture)->setDefault();
-	((StorageTextureBindingLayout*)&storageTexture)->setDefault();
+	((BufferBindingLayout*)&buffer)->set_default();
+	((SamplerBindingLayout*)&sampler)->set_default();
+	((TextureBindingLayout*)&texture)->set_default();
+	((StorageTextureBindingLayout*)&storageTexture)->set_default();
 	buffer.type = BufferBindingType::Undefined;
 	sampler.type = SamplerBindingType::Undefined;
 	storageTexture.access = StorageTextureAccess::Undefined;
@@ -1736,8 +1736,8 @@ void BindGroupLayoutEntry::set_default() {
 
 // Methods of BlendState
 void BlendState::set_default() {
-	((BlendComponent*)&color)->setDefault();
-	((BlendComponent*)&alpha)->setDefault();
+	((BlendComponent*)&color)->set_default();
+	((BlendComponent*)&alpha)->set_default();
 }
 
 
@@ -1760,20 +1760,20 @@ void DepthStencilState::set_default() {
 	depthBias = 0;
 	depthBiasSlopeScale = 0;
 	depthBiasClamp = 0;
-	((StencilFaceState*)&stencilFront)->setDefault();
-	((StencilFaceState*)&stencilBack)->setDefault();
+	((StencilFaceState*)&stencilFront)->set_default();
+	((StencilFaceState*)&stencilBack)->set_default();
 }
 
 
 // Methods of FutureWaitInfo
 void FutureWaitInfo::set_default() {
-	((Future*)&future)->setDefault();
+	((Future*)&future)->set_default();
 }
 
 
 // Methods of ImageCopyBuffer
 void ImageCopyBuffer::set_default() {
-	((TextureDataLayout*)&layout)->setDefault();
+	((TextureDataLayout*)&layout)->set_default();
 }
 
 
@@ -1781,13 +1781,13 @@ void ImageCopyBuffer::set_default() {
 void ImageCopyTexture::set_default() {
 	mipLevel = 0;
 	aspect = TextureAspect::All;
-	((Origin3D*)&origin)->setDefault();
+	((Origin3D*)&origin)->set_default();
 }
 
 
 // Methods of InstanceDescriptor
 void InstanceDescriptor::set_default() {
-	((InstanceFeatures*)&features)->setDefault();
+	((InstanceFeatures*)&features)->set_default();
 }
 
 
@@ -1800,19 +1800,19 @@ void ProgrammableStageDescriptor::set_default() {
 void RenderPassColorAttachment::set_default() {
 	loadOp = LoadOp::Undefined;
 	storeOp = StoreOp::Undefined;
-	((Color*)&clearValue)->setDefault();
+	((Color*)&clearValue)->set_default();
 }
 
 
 // Methods of RequiredLimits
 void RequiredLimits::set_default() {
-	((Limits*)&limits)->setDefault();
+	((Limits*)&limits)->set_default();
 }
 
 
 // Methods of SupportedLimits
 void SupportedLimits::set_default() {
-	((Limits*)&limits)->setDefault();
+	((Limits*)&limits)->set_default();
 }
 
 
@@ -1822,7 +1822,7 @@ void TextureDescriptor::set_default() {
 	format = TextureFormat::Undefined;
 	mipLevelCount = 1;
 	sampleCount = 1;
-	((Extent3D*)&size)->setDefault();
+	((Extent3D*)&size)->set_default();
 }
 
 
@@ -1845,13 +1845,13 @@ void ColorTargetState::set_default() {
 
 // Methods of ComputePipelineDescriptor
 void ComputePipelineDescriptor::set_default() {
-	((ProgrammableStageDescriptor*)&compute)->setDefault();
+	((ProgrammableStageDescriptor*)&compute)->set_default();
 }
 
 
 // Methods of DeviceDescriptor
 void DeviceDescriptor::set_default() {
-	((QueueDescriptor*)&defaultQueue)->setDefault();
+	((QueueDescriptor*)&defaultQueue)->set_default();
 }
 
 
@@ -1872,9 +1872,9 @@ void FragmentState::set_default() {
 
 // Methods of RenderPipelineDescriptor
 void RenderPipelineDescriptor::set_default() {
-	((VertexState*)&vertex)->setDefault();
-	((PrimitiveState*)&primitive)->setDefault();
-	((MultisampleState*)&multisample)->setDefault();
+	((VertexState*)&vertex)->set_default();
+	((PrimitiveState*)&primitive)->set_default();
+	((MultisampleState*)&multisample)->set_default();
 }
 
 
@@ -2616,69 +2616,6 @@ void TextureView::release() const {
 }
 
 
-
-// Extra implementations
-Adapter Instance::requestAdapter(const RequestAdapterOptions& options) {
-	struct Context {
-		Adapter adapter = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	auto h = requestAdapter(options, [&context](
-		RequestAdapterStatus status,
-		Adapter adapter,
-		const char* message
-	) {
-		if (status == RequestAdapterStatus::Success) {
-			context.adapter = adapter;
-		}
-		else {
-			std::cout << "Could not get WebGPU adapter: " << message << std::endl;
-		}
-		context.requestEnded = true;
-	});
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.adapter;
-}
-
-Device Adapter::requestDevice(const DeviceDescriptor& descriptor) {
-	struct Context {
-		Device device = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	auto h = requestDevice(descriptor, [&context](
-		RequestDeviceStatus status,
-		Device device,
-		const char* message
-	) {
-		if (status == RequestDeviceStatus::Success) {
-			context.device = device;
-		}
-		else {
-			std::cout << "Could not get WebGPU device: " << message << std::endl;
-		}
-		context.requestEnded = true;
-	});
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.device;
-}
 
 #endif // WEBGPU_CPP_IMPLEMENTATION
 

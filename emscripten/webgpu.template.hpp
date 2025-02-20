@@ -101,8 +101,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() { nextInChain = nullptr; } \
 	Type(const W &other) : W(other) { nextInChain = nullptr; } \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 	friend auto operator<<(std::ostream &stream, const S&) -> std::ostream & { \
 		return stream << "<wgpu::" << #Type << ">"; \
 	} \
@@ -115,8 +115,8 @@ public: \
 	typedef WGPU ## Type W; /* W == WGPU Type */ \
 	Type() : W() {} \
 	Type(const W &other) : W(other) {} \
-	Type(const DefaultFlag &) : W() { setDefault(); } \
-	Type& operator=(const DefaultFlag &) { setDefault(); return *this; } \
+	Type(const DefaultFlag &) : W() { set_default(); } \
+	Type& operator=(const DefaultFlag &) { set_default(); return *this; } \
 public:
 
 #define STRUCT(Type) \
@@ -143,10 +143,10 @@ public: \
 
 {{begin-inject}}
 HANDLE(Instance)
-	Adapter requestAdapter(const RequestAdapterOptions& options);
+	Adapter request_adapter(const RequestAdapterOptions& options);
 END
 HANDLE(Adapter)
-	Device requestDevice(const DeviceDescriptor& descriptor);
+	Device request_device(const DeviceDescriptor& descriptor);
 END
 STRUCT(Color)
 	Color(double r, double g, double b, double a) : WGPUColor{ r, g, b, a } {}
@@ -187,84 +187,21 @@ wgpuDeviceGetLostFuture
 // Non-member procedures
 {{procedures}}
 
-Instance createInstance();
-Instance createInstance(const InstanceDescriptor& descriptor);
+Instance create_instance();
+Instance create_instance(const InstanceDescriptor& descriptor);
 
 #ifdef WEBGPU_CPP_IMPLEMENTATION
 
-Instance createInstance() {
+Instance create_instance() {
 	return wgpuCreateInstance(nullptr);
 }
 
-Instance createInstance(const InstanceDescriptor& descriptor) {
+Instance create_instance(const InstanceDescriptor& descriptor) {
 	return wgpuCreateInstance(&descriptor);
 }
 
 // Handles members implementation
 {{handles_impl}}
-
-// Extra implementations
-Adapter Instance::requestAdapter(const RequestAdapterOptions& options) {
-	struct Context {
-		Adapter adapter = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	auto h = requestAdapter{{ext_suffix}}(options, [&context](
-		RequestAdapterStatus status,
-		Adapter adapter,
-		const char* message
-	) {
-		if (status == RequestAdapterStatus::Success) {
-			context.adapter = adapter;
-		}
-		else {
-			std::cout << "Could not get WebGPU adapter: " << message << std::endl;
-		}
-		context.requestEnded = true;
-	});
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.adapter;
-}
-
-Device Adapter::requestDevice(const DeviceDescriptor& descriptor) {
-	struct Context {
-		Device device = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	auto h = requestDevice{{ext_suffix}}(descriptor, [&context](
-		RequestDeviceStatus status,
-		Device device,
-		const char* message
-	) {
-		if (status == RequestDeviceStatus::Success) {
-			context.device = device;
-		}
-		else {
-			std::cout << "Could not get WebGPU device: " << message << std::endl;
-		}
-		context.requestEnded = true;
-	});
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.device;
-}
 
 #endif // WEBGPU_CPP_IMPLEMENTATION
 

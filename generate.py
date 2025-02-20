@@ -566,7 +566,7 @@ def produceBinding(args, api, meta):
                     for prop in cls_api.properties
                     if prop.default_value is not None
                 ] + [
-                    f"\t(({prop.type[4:]}*)&{prop.name})->setDefault();\n"
+                    f"\t(({prop.type[4:]}*)&{prop.name})->{to_snake_case('setDefault')}();\n"
                     for prop in cls_api.properties
                     if prop.type in class_names
                 ] + [

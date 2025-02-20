@@ -200,7 +200,7 @@ Instance create_instance(const InstanceDescriptor& descriptor);
 #ifdef WEBGPU_CPP_IMPLEMENTATION
 
 Instance create_instance() {
-	return wgpuCreateInstance(nullptr);
+    return wgpuCreateInstance(nullptr);
 }
 
 Instance create_instance(const InstanceDescriptor& descriptor) {
@@ -209,92 +209,6 @@ Instance create_instance(const InstanceDescriptor& descriptor) {
 
 // Handles members implementation
 {{handles_impl}}
-
-// Extra implementations
-Adapter Instance::request_adapter(const RequestAdapterOptions& options) {
-	struct Context {
-		Adapter adapter = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	RequestAdapterCallbackInfo{{ext_suffix}} callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestAdapterStatus status,
-		WGPUAdapter adapter,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == RequestAdapterStatus::Success) {
-			context.adapter = adapter;
-		}
-		else {
-			std::cout << "Could not get WebGPU adapter: " << StringView(message) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = CallbackMode::AllowSpontaneous;
-	request_adapter{{ext_suffix}}(options, callbackInfo);
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.adapter;
-}
-
-Device Adapter::request_device(const DeviceDescriptor& descriptor) {
-	struct Context {
-		Device device = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-
-	RequestDeviceCallbackInfo{{ext_suffix}} callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestDeviceStatus status,
-		WGPUDevice device,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == RequestDeviceStatus::Success) {
-			context.device = device;
-		}
-		else {
-			std::cout << "Could not get WebGPU device: " << StringView(message) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = CallbackMode::AllowSpontaneous;
-	request_device{{ext_suffix}}(descriptor, callbackInfo);
-
-#if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
-#endif
-
-	assert(context.requestEnded);
-	return context.device;
-}
-
-StringView::operator std::string_view() const {
-	return
-		length == WGPU_STRLEN
-		? std::string_view(data)
-		: std::string_view(data, length);
-}
 
 #endif // WEBGPU_CPP_IMPLEMENTATION
 
